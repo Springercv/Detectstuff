@@ -1,3 +1,4 @@
+//http://robocv.blogspot.de/2012/02/real-time-object-detection-in-opencv.html
 #include <stdio.h>
 #include <iostream>
 #include "opencv2/core/core.hpp"
