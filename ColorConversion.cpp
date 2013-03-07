@@ -1,6 +1,7 @@
 // Create a HSV image from the RGB image using the full 8-bits, since OpenCV only allows Hues up to 180 instead of 255.
 // ref: "http://cs.haifa.ac.il/hagit/courses/ist/Lectures/Demos/ColorApplet2/t_convert.html"
 // Remember to free the generated HSV image.
+//From https://github.com/shervinemami
 #include "stdafx.h"
 #ifdef _CH_
 #pragma package <opencv>
