@@ -1,4 +1,4 @@
-//Not yet check
+//Not yet check, more info: http://asetya.blog.amikom.ac.id/2012/07/18/reading-and-playing-video-file-in-using-opencv-library/
 ///////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include <cv.h>
