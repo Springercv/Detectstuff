@@ -1,4 +1,5 @@
-//Not yet check, more info: http://asetya.blog.amikom.ac.id/2012/07/18/reading-and-playing-video-file-in-using-opencv-library/
+//Not yet check, from: http://opencv-srf.blogspot.de/2011/09/capturing-images-videos.html
+//more info: http://asetya.blog.amikom.ac.id/2012/07/18/reading-and-playing-video-file-in-using-opencv-library/
 ///////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include <cv.h>
