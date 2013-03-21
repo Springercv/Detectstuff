@@ -1,3 +1,7 @@
+//Try using cvinRange(hsv, Scalar(0, 58, 89), Scalar(25, 173, 229), bw); from
+//http://bsd-noobz.com/opencv-guide/60-4-skin-detection
+
+
 #ifdef _CH_
 #pragma package <opencv>
 #endif
@@ -8,6 +12,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <iostream>
+#include <ctime>
 
 const char *VENTANA="Blob detection";
 
@@ -124,6 +129,14 @@ void Color(IplImage *img)
     
     //cvShowImage( "dst", dst );
 }   
+//This function threshold the HSV image and create a binary image
+
+IplImage* GetThresholdedImage(IplImage* imgHSV){        
+       IplImage* imgThresh=cvCreateImage(cvGetSize(imgHSV),IPL_DEPTH_8U, 1);
+       cvInRangeS(imgHSV, cvScalar(0, 58, 89), cvScalar(25, 173, 229), imgThresh); 
+       return imgThresh;
+} 
+ 
 
 void detect_and_draw( IplImage* img )
 {
@@ -157,7 +170,7 @@ void detect_and_draw( IplImage* img )
     storage = cvCreateMemStorage(0);
 
     // Create a new named window with title: result
-    cvNamedWindow( "result", 1 );
+    //cvNamedWindow( "result", 1 );
 
     // Clear the memory storage which was used before
     cvClearMemStorage( storage );
@@ -190,7 +203,7 @@ void detect_and_draw( IplImage* img )
     }
 
     // Show the image in the window named "result"
-    cvShowImage( "result", img );
+    //cvShowImage( "result", img );
 
     // Release the temp image created.
     cvReleaseImage( &temp );
@@ -253,11 +266,11 @@ int main( int argc, char** argv )
 
   //Optimize contours, reduce points
   contourLow=cvApproxPoly(contour, sizeof(CvContour), storage,CV_POLY_APPROX_DP,1,1);
+  
+  double t = 0;
+  t = (double)cvGetTickCount();
 
-  //Show to user the 7 hu moments (features detected) we can use this for clasification
-  printf("hu1\t\thu2\t\thu3\t\thu4\t\thu5\t\thu6\t\thu7\n");
-
-  //Color(imagen_color);
+  Color(imagen_color);
   //For each contour found
   for( ; contourLow != 0; contourLow = contourLow->h_next )
   {
@@ -272,23 +285,22 @@ int main( int argc, char** argv )
       pt2.x = (rect.x+rect.width);
       pt1.y = rect.y;
       pt2.y = (rect.y+rect.height);
+
       //cvRectangle(imagen_color, pt1,pt2, color, 1, 8, 0);
-      cvSetImageROI(imagen_color,rect );
-      detect_and_draw(imagen_color);
-      cvResetImageROI(imagen_color);
-      //For calculate objects features we can use hu moments.
-      //this calculate 7 features that are independent of position, size and orientation
+      t = (double)cvGetTickCount() - t;
+      printf( "Blob detection time = %g ms\n", t/((double)cvGetTickFrequency()*1000.) );
 
-      //First calculate object moments
-      cvMoments(contourLow, &moments, 0);
-      //Now calculate hu moments
-      cvGetHuMoments(&moments, &humoments);
+      IplImage* imgHSV = cvCreateImage(cvGetSize(imagen_color), IPL_DEPTH_8U, 3); 
+      cvCvtColor(imagen_color, imgHSV, CV_BGR2HSV); //Change the color format from BGR to HSV
+      IplImage* imgThresh = GetThresholdedImage(imgHSV);
+      cvSetImageROI(imagen_color,rect );          
+      detect_and_draw(imagen); cvResetImageROI(imagen_color);
 
-      //Show result.
-      printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\n", humoments.hu1, humoments.hu2, humoments.hu3, humoments.hu4, humoments.hu5, humoments.hu6, humoments.hu7);
   }
+  t = (double)cvGetTickCount() - t;
+  printf( "face detection time = %g ms\n", t/((double)cvGetTickFrequency()*1000.) );
 
-  //cvShowImage(VENTANA, imagen_color);
+  cvShowImage(VENTANA, imagen_color);
 
   //Main Loop
   for(;;)
