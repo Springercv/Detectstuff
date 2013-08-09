@@ -29,6 +29,7 @@ int getdir (string dir, vector<string> &files)
   DIR *dp;
   struct dirent *dirp;
   string subdir;
+  int nfiles = 0;
   //struct stat filestat;
   if((dp = opendir(dir.c_str())) == NULL) {
     cout << "Error(" << errno << ") opening " << dir << endl;
@@ -39,15 +40,19 @@ int getdir (string dir, vector<string> &files)
       if ( strstr( dirp->d_name, ".JPG") || strstr( dirp->d_name, ".jpg") || strstr(dirp->d_name, ".ppm")){                 
           subdir = string(dir+ "/" + dirp->d_name);
           files.push_back(subdir);
-          IplImage *imageBGR = cvLoadImage(dirp->d_name, CV_LOAD_IMAGE_COLOR);    
-          cout <<"Load file: "<< subdir << endl;
-          detect_and_draw(imageBGR, dirp->d_name);      
-          cvWaitKey();
-      }
-    }
+          IplImage *imageBGR = cvLoadImage(subdir.c_str(), CV_LOAD_IMAGE_COLOR); 
+          //cvShowImage("Input Image",imageBGR);
+          nfiles++; 
+          cout <<"Load file number: "<<nfiles <<endl << subdir << endl;
+          detect_and_draw(imageBGR, string(dirp->d_name)); 
+          
+          //cvWaitKey();
+       }
+    }    
+
     else if (dirp->d_name!="" && dirp->d_namlen != 0 ){  
          if (!strcmp(dirp->d_name, ".") || !strcmp(dirp->d_name, ".."))
-      		continue;
+        		continue;
           subdir = dir + "/" + dirp->d_name;
           getdir(subdir.c_str(),files); 
           cout<<"This is opening directory "<<subdir<<endl;
@@ -61,6 +66,9 @@ void detect_and_draw( IplImage* img, string line)
     // Create memory for calculations
     cvErode(img, img,NULL,1);   
     cvDilate(img, img,NULL,1); 
+    
+    line = loct + "/" + line; 
+
     static CvMemStorage* storage = 0;
 
     // Create a new Haar classifier
@@ -90,7 +98,7 @@ void detect_and_draw( IplImage* img, string line)
     storage = cvCreateMemStorage(0);
 
     // Create a new named window with title: result
-    cvNamedWindow( "result", 1 );
+    //cvNamedWindow( "result", 1 );
 
     // Clear the memory storage which was used before
     cvClearMemStorage( storage );
@@ -124,8 +132,7 @@ void detect_and_draw( IplImage* img, string line)
 
             //cvResize(small_img, face, CV_INTER_CUBIC);
             
-            sfile <<i;                   
-            
+            sfile <<i;                               
             line.insert(line.length()- 4,sfile.str());
             cout<<"save as: "<<line<<endl;                            
             cvSaveImage(line.c_str(), img);                
@@ -140,39 +147,55 @@ void detect_and_draw( IplImage* img, string line)
     // Release the temp image created.
     cvReleaseImage( &temp );
     cvReleaseImage( &img );
+    cvReleaseHaarClassifierCascade( &cascade );
     cvReleaseMemStorage(&storage);  
+ }
+void MakeList ( vector<string> &files)
+{
+  ofstream myfile;
+  string filename = "???.txt";
+  //cout<< "Enter a file to open (leave blank to quit):\n";
+  //getline( cin, filename );
+  myfile.open( filename.c_str() );
+
+  /*if ( dir == "" ) {
+     exit(1);
+  }*/
+
+  for (unsigned int i = 0;i < files.size();i++) {
+    if (myfile.is_open())
+      {
+        //cout << files[i] << endl; 
+        myfile << files[i]<< endl;    
+      }
+      else cout << "Unable to open file";      
+  }
+}
+void ProcessList ()
+{
+  string line;
+  vector<string> files = vector<string>();
+  ifstream myfile ("???.txt");//D:/lexuanpr/Datasets/Source_Image/file.lst*/
+  if (myfile.is_open()) {
+    while ( myfile.good() )
+    {  
+      getline (myfile,line); 
+      getdir(line,files);
+      //IplImage *imageBGR = cvLoadImage(line.c_str(), CV_LOAD_IMAGE_COLOR);    
+      //detect_and_draw(imageBGR, line);      
+    }
+  }
+  myfile.close();
  }
 int main()
 {
-string dir = "D:/lexuanpr/Datasets/FRGC/nd1";
+string dir = "D:/lexuanpr/Datasets/FRGC/nd1/Spring2003";
 //cout<< "Enter a directory path to open (leave blank to quit):\n";
 //getline( cin, dir );
 
-ofstream myfile;
-string filename = "FRGC.txt";
-//cout<< "Enter a file to open (leave blank to quit):\n";
-//getline( cin, filename );
-myfile.open( filename.c_str() );
-
-if ( dir == "" ) {
-   exit(1);
-}
 //string dir = string(".");
 vector<string> files = vector<string>();
 getdir(dir,files);
   
-for (unsigned int i = 0;i < files.size();i++) {
-  /*if (myfile.is_open())
-    {
-      //cout << files[i] << endl; 
-      myfile << files[i]<< endl;    
-    }
-    else cout << "Unable to open file";*/
-    IplImage *imageBGR = cvLoadImage(files[i].c_str(), CV_LOAD_IMAGE_COLOR);    
-    cout <<"Load file: "<< files[i] << endl;
-    detect_and_draw(imageBGR, files[i]);      
-    cvWaitKey();
-}
-myfile.close();
 return 0;
 }
